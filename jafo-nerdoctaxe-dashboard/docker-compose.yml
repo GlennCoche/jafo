@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      # Nom du conteneur server généré par Umbrel (id de l'app + _server_1)
+      APP_HOST: jafo-nerdoctaxe-dashboard_server_1
+      APP_PORT: 3000
+
+  server:
+    build: .
+    user: "1000:1000"
+    restart: on-failure
+    environment:
+      MINER_IP: ${MINER_IP:-192.168.1.37}
+    volumes:
+      - ${APP_DATA_DIR:-./data}:/app/data

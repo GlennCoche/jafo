@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NerdOctaxe — Dashboard complet</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --warn: #d29922;
+      --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+    h2 { font-size: 1rem; color: var(--muted); margin: 0 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+    .config-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .config-bar label { color: var(--muted); }
+    .config-bar input[type="text"] {
+      width: 140px;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+    }
+    .config-bar input[type="number"] { width: 70px; padding: 0.4rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+    .config-bar button {
+      padding: 0.4rem 0.8rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .config-bar button:hover { filter: brightness(1.1); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .status.ok { background: rgba(63,185,80,0.2); color: var(--ok); }
+    .status.err { background: rgba(248,81,73,0.2); color: var(--err); }
+    .status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+    .status.err::before { animation: none; }
+    @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.5 } }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .card.wide { grid-column: 1 / -1; }
+    .kv { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.9rem; }
+    .kv .k { color: var(--muted); }
+    .kv .v { font-variant-numeric: tabular-nums; }
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+    .chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .chip .label { font-size: 0.75rem; color: var(--muted); }
+    .chip .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .chip .err { font-size: 0.7rem; color: var(--warn); }
+    .chip .muted { color: var(--muted); font-size: 0.7rem; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .chip-line { display: flex; align-items: center; gap: 0.5rem; font-variant-numeric: tabular-nums; }
+    .chip-line .ok { color: var(--ok); }
+    .reject-reasons { font-size: 0.85rem; color: var(--muted); }
+    .reject-reasons ul { margin: 0.25rem 0 0 1rem; padding: 0; }
+    .updated { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+    .graph-placeholder { height: 120px; background: var(--bg); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.9rem; }
+    #chartHistory { height: 200px; }
+    .big-num { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .efficiency { color: var(--ok); }
+    .error-msg { background: rgba(248,81,73,0.15); color: var(--err); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="config-bar">
+    <label>Adresse du miner (IP ou hostname) :</label>
+    <input type="text" id="minerHost" placeholder="192.168.1.37" value="192.168.1.37" />
+    <label>Rafraîchissement (s) :</label>
+    <input type="number" id="refreshSec" min="1" max="60" value="2" />
+    <button type="button" id="btnSave">Enregistrer</button>
+    <button type="button" id="btnRefresh">Rafraîchir maintenant</button>
+    <span class="status err" id="connectionStatus">Déconnecté</span>
+  </div>
+  <div id="errorBox" class="error-msg" style="display:none;"></div>
+  <p class="updated" style="margin-bottom: 0.5rem; font-size: 0.85rem;">ℹ️ Un « — » est souvent normal : capteur unique (temp 2, ventilateur 2), données non envoyées par le firmware (hashrate par puce, bloc réseau, etc.) ou optionnelles (pool fallback, raison du reset).</p>
+
+  <div class="grid">
+    <!-- Hashrate & efficacité -->
+    <div class="card wide">
+      <h2>Hashrate & efficacité</h2>
+      <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));">
+        <div class="kv"><span class="k">Actuel</span><span class="v big-num" id="hashRate">—</span></div>
+        <div class="kv"><span class="k">1 min</span><span class="v" id="hashRate_1m">—</span></div>
+        <div class="kv"><span class="k">10 min</span><span class="v" id="hashRate_10m">—</span></div>
+        <div class="kv"><span class="k">1 h</span><span class="v" id="hashRate_1h">—</span></div>
+        <div class="kv"><span class="k">Attendu (config)</span><span class="v" id="expectedHashrate">—</span></div>
+        <div class="kv"><span class="k">Efficacité</span><span class="v efficiency" id="efficiency">—</span></div>
+      </div>
+    </div>
+
+    <!-- Parts (shares) -->
+    <div class="card">
+      <h2>Parts (shares)</h2>
+      <div class="kv"><span class="k">Acceptées</span><span class="v" id="sharesAccepted">—</span></div>
+      <div class="kv"><span class="k">Rejetées</span><span class="v" id="sharesRejected">—</span></div>
+      <div class="kv"><span class="k">Taux rejet</span><span class="v" id="rejectPct">—</span></div>
+      <div class="reject-reasons" id="sharesRejectedReasons">—</div>
+    </div>
+
+    <!-- Meilleure difficulté -->
+    <div class="card">
+      <h2>Difficulté</h2>
+      <div class="kv"><span class="k">Meilleure (record)</span><span class="v" id="bestDiff">—</span></div>
+      <div class="kv"><span class="k">Session</span><span class="v" id="bestSessionDiff">—</span></div>
+      <div class="kv"><span class="k">Pool</span><span class="v" id="poolDifficulty">—</span></div>
+      <div class="kv"><span class="k">Bloc réseau</span><span class="v" id="blockHeight">—</span></div>
+      <div class="kv"><span class="k">Bloc trouvé</span><span class="v" id="blockFound">—</span></div>
+    </div>
+
+    <!-- Consommation électrique -->
+    <div class="card">
+      <h2>Consommation électrique</h2>
+      <div class="kv"><span class="k">Puissance</span><span class="v" id="power">—</span></div>
+      <div class="kv"><span class="k">Courant entrée</span><span class="v" id="current">—</span></div>
+      <div class="kv"><span class="k">Tension entrée</span><span class="v" id="voltage">—</span></div>
+      <div class="kv"><span class="k">Tension ASIC (config)</span><span class="v" id="coreVoltage">—</span></div>
+      <div class="kv"><span class="k">Tension ASIC (mesurée)</span><span class="v" id="coreVoltageActual">—</span></div>
+    </div>
+
+    <!-- Chaleur & ventilateurs -->
+    <div class="card">
+      <h2>Chaleur & ventilateurs</h2>
+      <div class="kv"><span class="k">Temp ASIC</span><span class="v" id="temp">—</span></div>
+      <div class="kv"><span class="k">Temp ASIC 2</span><span class="v" id="temp2">—</span></div>
+      <div class="kv"><span class="k">Temp VR</span><span class="v" id="vrTemp">—</span></div>
+      <div class="kv"><span class="k">Ventilateur</span><span class="v" id="fanspeed">—</span></div>
+      <div class="kv"><span class="k">RPM ventilateur 1</span><span class="v" id="fanrpm">—</span></div>
+      <div class="kv"><span class="k">RPM ventilateur 2</span><span class="v" id="fan2rpm">—</span></div>
+    </div>
+
+    <!-- Performance ASIC -->
+    <div class="card">
+      <h2>Performance ASIC</h2>
+      <div class="kv"><span class="k">Fréquence</span><span class="v" id="frequency">—</span></div>
+      <div class="kv"><span class="k">Erreurs hashrate %</span><span class="v" id="errorPercentage">—</span></div>
+      <div class="kv"><span class="k">Small cores</span><span class="v" id="smallCoreCount">—</span></div>
+      <div class="kv"><span class="k">Modèle</span><span class="v" id="ASICModel">—</span></div>
+    </div>
+
+    <!-- Pool -->
+    <div class="card wide">
+      <h2>Pool (primaire)</h2>
+      <div class="kv"><span class="k">URL</span><span class="v" id="stratumURL">—</span></div>
+      <div class="kv"><span class="k">Port</span><span class="v" id="stratumPort">—</span></div>
+      <div class="kv"><span class="k">Utilisateur</span><span class="v" id="stratumUser" style="word-break:break-all;">—</span></div>
+      <div class="kv"><span class="k">Ping (réponse)</span><span class="v" id="responseTime">—</span></div>
+      <div class="kv"><span class="k">Utilise fallback</span><span class="v" id="isUsingFallbackStratum">—</span></div>
+    </div>
+
+    <!-- Répartition par chip (8× BM1370) -->
+    <div class="card wide">
+      <h2>Répartition par chip (8× BM1370)</h2>
+      <div id="chipsContainer" class="chip-list"></div>
+    </div>
+
+    <!-- Système -->
+    <div class="card">
+      <h2>Système</h2>
+      <div class="kv"><span class="k">Uptime</span><span class="v" id="uptimeSeconds">—</span></div>
+      <div class="kv"><span class="k">Firmware</span><span class="v" id="version">—</span></div>
+      <div class="kv"><span class="k">AxeOS</span><span class="v" id="axeOSVersion">—</span></div>
+      <div class="kv"><span class="k">Hostname</span><span class="v" id="hostname">—</span></div>
+      <div class="kv"><span class="k">IPv4</span><span class="v" id="ipv4">—</span></div>
+      <div class="kv"><span class="k">WiFi RSSI</span><span class="v" id="wifiRSSI">—</span></div>
+      <div class="kv"><span class="k">Dernier reset</span><span class="v" id="resetReason">—</span></div>
+    </div>
+  </div>
+
+  <p class="updated">Dernière mise à jour : <span id="lastUpdate">—</span></p>
+
+  <script>
+    const minerHostInput = document.getElementById('minerHost');
+    const refreshSecInput = document.getElementById('refreshSec');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const errorBox = document.getElementById('errorBox');
+    const chipsContainer = document.getElementById('chipsContainer');
+
+    const STORAGE_HOST = 'nerdoctaxe_dashboard_host';
+    const STORAGE_REFRESH = 'nerdoctaxe_dashboard_refresh';
+
+    let proxyMode = false;
+    let serverMinerIp = '';
+
+    function loadConfig() {
+      const r = localStorage.getItem(STORAGE_REFRESH);
+      if (r) refreshSecInput.value = r;
+      if (!proxyMode) {
+        const h = localStorage.getItem(STORAGE_HOST);
+        if (h) minerHostInput.value = h;
+        else if (!minerHostInput.value) minerHostInput.value = '192.168.1.37';
+      } else {
+        minerHostInput.value = serverMinerIp || '192.168.1.37';
+        minerHostInput.placeholder = 'IP du miner (sauvegardée sur le serveur)';
+      }
+    }
+    function saveConfig() {
+      if (!proxyMode) localStorage.setItem(STORAGE_HOST, minerHostInput.value.trim());
+      localStorage.setItem(STORAGE_REFRESH, refreshSecInput.value);
+      if (proxyMode) {
+        fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ minerIp: minerHostInput.value.trim() }) })
+          .then(r => r.json()).then(d => { if (d.ok) serverMinerIp = d.minerIp; });
+      }
+    }
+
+    function formatGh(n) {
+      if (n == null || isNaN(n)) return '—';
+      if (n >= 1000) return (n / 1000).toFixed(2) + ' TH/s';
+      return Number(n).toFixed(2) + ' GH/s';
+    }
+    function formatNum(n, decimals) {
+      if (n == null || isNaN(n)) return '—';
+      return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: decimals ?? 2 });
+    }
+    function formatUptime(sec) {
+      if (sec == null || isNaN(sec)) return '—';
+      const d = Math.floor(sec / 86400);
+      const h = Math.floor((sec % 86400) / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const parts = [];
+      if (d) parts.push(d + ' j');
+      if (h) parts.push(h + ' h');
+      parts.push(m + ' min');
+      return parts.join(' ');
+    }
+
+    function setStatus(ok, msg) {
+      connectionStatus.textContent = msg || (ok ? 'Connecté' : 'Erreur');
+      connectionStatus.className = 'status ' + (ok ? 'ok' : 'err');
+    }
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = msg ? 'block' : 'none';
+    }
+
+    function fill(data) {
+      if (!data) return;
+      const val = (...keys) => { for (const k of keys) { const v = data[k]; if (v !== undefined && v !== null && v !== '') return v; } return undefined; };
+      const get = (id, fn, keys) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = fn(keys ? val(...keys) : data[id]);
+      };
+      const getNum = (id, decimals, keys) => get(id, v => formatNum(v, decimals), keys || [id]);
+      get('hashRate', v => formatGh(v), ['hashRate', 'hashrate']);
+      get('hashRate_1m', v => formatGh(v), ['hashRate_1m', 'hashrate_1m']);
+      get('hashRate_10m', v => formatGh(v), ['hashRate_10m', 'hashrate_10m']);
+      get('hashRate_1h', v => formatGh(v), ['hashRate_1h', 'hashrate_1h']);
+      get('expectedHashrate', v => formatGh(v), ['expectedHashrate', 'expectedHashrate']);
+      const power = data.power != null ? Number(data.power) : null;
+      const hr = val('hashRate', 'hashrate');
+      const hrNum = hr != null ? Number(hr) : null;
+      const eff = (power != null && hrNum != null && hrNum > 0) ? (power / (hrNum / 1000)).toFixed(2) + ' W/TH' : '—';
+      document.getElementById('efficiency').textContent = eff;
+
+      getNum('sharesAccepted');
+      getNum('sharesRejected');
+      const acc = data.sharesAccepted != null ? Number(data.sharesAccepted) : 0;
+      const rej = data.sharesRejected != null ? Number(data.sharesRejected) : 0;
+      const total = acc + rej;
+      document.getElementById('rejectPct').textContent = total ? (100 * rej / total).toFixed(2) + ' %' : '—';
+      const reasons = data.sharesRejectedReasons;
+      const reasonEl = document.getElementById('sharesRejectedReasons');
+      if (Array.isArray(reasons) && reasons.length) {
+        reasonEl.innerHTML = 'Raisons : <ul>' + reasons.map(r => `<li>${r.message || ''}: ${r.count ?? 0}</li>`).join('') + '</ul>';
+      } else {
+        reasonEl.textContent = rej ? 'Raisons non détaillées' : 'Aucun rejet';
+      }
+
+      get('bestDiff', v => v != null ? formatNum(v) + ' (' + (v >= 1e6 ? (v/1e6).toFixed(2) + ' M' : v) + ')' : '—');
+      get('bestSessionDiff', v => v != null ? formatNum(v) : '—');
+      getNum('poolDifficulty', null, ['poolDifficulty', 'pool_difficulty']);
+      getNum('blockHeight', null, ['blockHeight', 'block_height']);
+      get('blockFound', v => v != null ? (v ? 'Oui' : 'Non') : '—', ['blockFound', 'block_found']);
+
+      get('power', v => v != null ? formatNum(v, 1) + ' W' : '—');
+      get('current', v => v != null ? formatNum(v / 1000, 2) + ' A' : '—');
+      get('voltage', v => v != null ? formatNum(v / 1000, 2) + ' V' : '—');
+      get('coreVoltage', v => v != null ? (v / 1000).toFixed(2) + ' V' : '—');
+      get('coreVoltageActual', v => v != null ? (v / 1000).toFixed(2) + ' V' : '—');
+
+      get('temp', v => v != null ? formatNum(v, 1) + ' °C' : '—');
+      get('temp2', v => (v != null && v >= 0) ? formatNum(v, 1) + ' °C' : '—', ['temp2', 'temp_2']);
+      get('vrTemp', v => v != null ? formatNum(v, 1) + ' °C' : '—');
+      get('fanspeed', v => v != null ? formatNum(v, 1) + ' %' : '—');
+      getNum('fanrpm', null, ['fanrpm', 'fan_rpm']);
+      getNum('fan2rpm', null, ['fan2rpm', 'fan2_rpm', 'fan_2rpm']);
+
+      get('frequency', v => v != null ? formatNum(v) + ' MHz' : '—');
+      get('errorPercentage', v => v != null ? formatNum(v, 2) + ' %' : '—');
+      getNum('smallCoreCount');
+      get('ASICModel', v => v ?? '—');
+
+      get('stratumURL', v => (v && typeof v === 'string') ? v.replace(/^stratum\+tcp:\/\//, '') : '—');
+      getNum('stratumPort');
+      get('stratumUser', v => (v && typeof v === 'string') ? (v.length > 40 ? v.slice(0, 40) + '…' : v) : '—');
+      get('responseTime', v => v != null ? formatNum(v, 2) + ' ms' : '—', ['responseTime', 'response_time']);
+      get('isUsingFallbackStratum', v => v != null ? (v ? 'Oui' : 'Non') : '—', ['isUsingFallbackStratum', 'is_using_fallback_stratum']);
+
+      // Extraire les hashrates par chip (plusieurs formats API possibles)
+      let chipGh = [];
+      const asics = (data.hashrateMonitor && data.hashrateMonitor.asics) || data.hashrate_monitor?.asics || data.asics;
+      if (Array.isArray(asics) && asics.length) {
+        chipGh = asics.map(a => (a && (a.total != null ? Number(a.total) : (typeof a === 'number' ? a : null))));
+      } else if (Array.isArray(data.chipHashrates)) {
+        chipGh = data.chipHashrates.map(v => typeof v === 'number' ? v : null);
+      } else if (Array.isArray(data.chip_hashrates)) {
+        chipGh = data.chip_hashrates.map(v => typeof v === 'number' ? v : null);
+      }
+      chipGh = chipGh.filter(v => v != null && !isNaN(v));
+      // Historique pour afficher min-max (max 20 échantillons par chip)
+      if (!window._chipHistory) window._chipHistory = [];
+      const MAX_HISTORY = 20;
+      if (chipGh.length >= 8) {
+        chipGh.forEach((gh, i) => {
+          if (!window._chipHistory[i]) window._chipHistory[i] = [];
+          window._chipHistory[i].push(gh / 1000);
+          if (window._chipHistory[i].length > MAX_HISTORY) window._chipHistory[i].shift();
+        });
+      }
+      if (chipGh.length) {
+        chipsContainer.innerHTML = chipGh.slice(0, 8).map((gh, i) => {
+          const th = (gh >= 10 ? gh / 1000 : gh); // GH/s → TH/s si valeur > 10
+          const hist = window._chipHistory[i] || [];
+          const label = hist.length >= 2 ? (Math.min(...hist).toFixed(2) + '–' + Math.max(...hist).toFixed(2)) : th.toFixed(2);
+          return `<div class="chip-line">Chip ${i}: <span class="val">${label} TH/s</span> <span class="ok">✓</span></div>`;
+        }).join('');
+      } else {
+        chipsContainer.innerHTML = '<div class="muted">Aucune donnée par puce (hashrateMonitor non exposé par l’API du firmware). Les logs du miner contiennent ces valeurs ; une mise à jour firmware peut les exposer via l’API.</div>';
+      }
+
+      get('uptimeSeconds', v => formatUptime(v), ['uptimeSeconds', 'uptime_seconds']);
+      get('version', v => v ?? '—', ['version']);
+      get('axeOSVersion', v => v ?? '—', ['axeOSVersion', 'axeOSVersion', 'axeos_version']);
+      get('hostname', v => v ?? '—', ['hostname']);
+      get('ipv4', v => v ?? '—', ['ipv4', 'ipV4', 'ip']);
+      get('wifiRSSI', v => v != null ? v + ' dBm' : '—', ['wifiRSSI', 'wifi_rssi']);
+      get('resetReason', v => v ?? '—', ['resetReason', 'reset_reason']);
+
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('fr-FR');
+    }
+
+    let refreshTimer = null;
+    async function fetchAndFill() {
+      const infoUrl = proxyMode ? '/api/miner/info' : ((() => { const h = minerHostInput.value.trim(); return (h.startsWith('http') ? h : 'http://' + h) + '/api/system/info'; })());
+      if (!proxyMode && !minerHostInput.value.trim()) {
+        setStatus(false, 'Indiquez l\'IP du miner');
+        showError('Entrez l’adresse IP ou le hostname du NerdOctaxe.');
+        return;
+      }
+      showError('');
+      try {
+        const r = await fetch(infoUrl, { method: 'GET' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        if (data.error && data.message === 'Miner unreachable') throw new Error('Miner unreachable: ' + (data.minerIp || ''));
+        fill(data);
+        setStatus(true);
+      } catch (e) {
+        setStatus(false, e.message || 'Erreur réseau');
+        showError(proxyMode ? 'Impossible de joindre le miner à ' + (serverMinerIp || '...') + '. Vérifiez la variable MINER_IP ou data/config.json sur le serveur.' : ('Impossible de joindre le miner. ' + e.message));
+      }
+    }
+
+    function startPolling() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      const sec = Math.max(1, parseInt(refreshSecInput.value, 10) || 2);
+      refreshTimer = setInterval(fetchAndFill, sec * 1000);
+      fetchAndFill();
+    }
+
+    document.getElementById('btnSave').addEventListener('click', () => { saveConfig(); startPolling(); });
+    document.getElementById('btnRefresh').addEventListener('click', () => fetchAndFill());
+
+    (async function init() {
+      try {
+        const c = await fetch('/config.json').then(r => r.json());
+        if (c.proxyMode) {
+          proxyMode = true;
+          serverMinerIp = c.minerIp || '192.168.1.37';
+          const bar = document.querySelector('.config-bar');
+          const lbl = bar.querySelector('label');
+          if (lbl) lbl.textContent = 'Miner (réseau local) :';
+        }
+      } catch (_) {}
+      loadConfig();
+      startPolling();
+    })();
+  </script>
+</body>
+</html>
