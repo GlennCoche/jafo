@@ -3,13 +3,16 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      # Nom du conteneur server généré par Umbrel (id de l'app + _server_1)
+      # Format Umbrel : {app-id}_{service}_1
       APP_HOST: jafo-nerdoctaxe-dashboard_server_1
       APP_PORT: 3000
 
   server:
-    build: .
+    # Image pré-construite requise : Umbrel ne build pas les apps du Community Store.
+    # Pour publier : depuis jafo-nerdoctaxe-dashboard/ exécuter le script ./build-and-push.sh
+    image: glenncoche/nerdoctaxe-dashboard:1.0.0
     user: "1000:1000"
+    init: true
     restart: on-failure
     environment:
       MINER_IP: ${MINER_IP:-192.168.1.37}

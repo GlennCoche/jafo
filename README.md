@@ -62,6 +62,27 @@ jafo/
 
 ---
 
+## Publication de l’image Docker (mainteneur)
+
+Umbrel **ne build pas** les apps du Community Store : il ne fait que cloner le dépôt et lancer `docker-compose up`. L’app utilise donc une **image pré-construite** sur Docker Hub. Sans cette image, le bouton **Installer** échoue sans message clair.
+
+Pour publier (ou mettre à jour) l’image une fois :
+
+1. Avoir un compte [Docker Hub](https://hub.docker.com/) (ex. utilisateur `glenncoche`).
+2. Se connecter : `docker login`
+3. Depuis le dossier `jafo-nerdoctaxe-dashboard/` :
+   ```bash
+   chmod +x build-and-push.sh
+   ./build-and-push.sh          # pousse glenncoche/nerdoctaxe-dashboard:1.0.0
+   # ou pour une autre version :
+   ./build-and-push.sh 1.0.1
+   ```
+4. Si vous avez changé la version, mettre à jour le tag dans `jafo-nerdoctaxe-dashboard/docker-compose.yml` (`image: glenncoche/nerdoctaxe-dashboard:1.0.1`) et la version dans `umbrel-app.yml`, puis pousser le dépôt sur GitHub.
+
+Après cela, les utilisateurs qui cliquent sur **Installer** dans le store Jafo pourront installer l’app correctement.
+
+---
+
 ## Ajouter d’autres apps plus tard
 
 1. Créer un nouveau dossier dont le nom commence par `jafo-` (ex. `jafo-une-autre-app`).
