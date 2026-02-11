@@ -1,20 +1,29 @@
+# NerdOctaxe Dashboard (Next.js) — déploiement Umbrel OS
+# L'image est construite depuis ../../dashboard-next et poussée sur Docker Hub.
+# Umbrel ne build pas les apps du Community Store : il utilise l'image pré-construite.
+
 version: "3.7"
 
 services:
   app_proxy:
     environment:
-      # Format Umbrel : {app-id}_{service}_1
       APP_HOST: jafo-nerdoctaxe-dashboard_server_1
       APP_PORT: 3000
 
   server:
-    # Image pré-construite requise : Umbrel ne build pas les apps du Community Store.
-    # Pour publier : depuis jafo-nerdoctaxe-dashboard/ exécuter le script ./build-and-push.sh
-    image: glenncoche/nerdoctaxe-dashboard:1.0.0
-    user: "1000:1000"
+    image: glenncoche/nerdoctaxe-dashboard:2.0.0
+    user: "1001:1001"
     init: true
     restart: on-failure
     environment:
       MINER_IP: ${MINER_IP:-192.168.1.37}
+      # Full node Umbrel (Public REST API, port 2100)
+      APP_BITCOIN_NODE_IP: ${APP_BITCOIN_NODE_IP:-}
+      BITCOIN_REST_API_URL: ${BITCOIN_REST_API_URL:-}
+      # Optionnel : RPC si pas de REST
+      APP_BITCOIN_RPC_PORT: ${APP_BITCOIN_RPC_PORT:-8332}
+      BITCOIN_RPC_USER: ${BITCOIN_RPC_USER:-}
+      BITCOIN_RPC_PASS: ${BITCOIN_RPC_PASS:-}
     volumes:
+      # Répertoire de données Umbrel (persistant) ; l'app utilise surtout les variables d'environnement
       - ${APP_DATA_DIR:-./data}:/app/data

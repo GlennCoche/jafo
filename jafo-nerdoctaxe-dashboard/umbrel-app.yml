@@ -1,15 +1,16 @@
 manifestVersion: 1
 id: jafo-nerdoctaxe-dashboard
 name: NerdOctaxe Dashboard
-tagline: Monitorer et optimiser votre NerdOctaxe (8× BM1370) sur le réseau local
+tagline: Tableau de bord complet pour votre mineur NerdOctaxe (hashrate, contrôle, full node, solo mining)
 icon: https://raw.githubusercontent.com/getumbrel/umbrel-community-app-store/master/sparkles-hello-world/icon.svg
 category: bitcoin
-version: "1.0.0"
+version: "2.0.0"
 port: 3000
 description: >-
-  Tableau de bord complet pour votre mineur NerdOctaxe 12 TH/s : hashrate en temps réel,
-  répartition par puce, températures, consommation, parts acceptées/rejetées, pool, et réglages.
-  L’app interroge le miner sur votre réseau local (variable MINER_IP). Aucune donnée ne sort de chez vous.
+  Dashboard Next.js pour NerdOctaxe : hashrate et températures en temps réel, consommation,
+  contrôle du miner (modes 0% à 100%), pool, coût électricité, blockchain, full node Bitcoin (REST),
+  calculateur solo mining. Configurez MINER_IP (IP du NerdOctaxe) et optionnellement
+  APP_BITCOIN_NODE_IP (ex. http://192.168.1.35:2100) pour la full node Umbrel.
 developer: GlennCoche
 website: https://github.com/GlennCoche/jafo
 submitter: GlennCoche
@@ -17,7 +18,8 @@ repo: https://github.com/GlennCoche/jafo
 support: https://github.com/GlennCoche/jafo/issues
 gallery: []
 releaseNotes: >-
-  Version initiale : dashboard complet avec proxy vers l’API du miner.
+  v2.0.0 : Dashboard Next.js complet (graphiques, modes %, full node REST, solo mining, coût électricité).
+  Variables : MINER_IP, APP_BITCOIN_NODE_IP (URL complète pour REST, ex. http://IP_UMBREL:2100).
 dependencies: []
 path: ""
 defaultUsername: ""
