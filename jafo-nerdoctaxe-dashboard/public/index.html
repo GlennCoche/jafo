@@ -125,7 +125,7 @@
     <span class="status err" id="connectionStatus">Déconnecté</span>
   </div>
   <div id="errorBox" class="error-msg" style="display:none;"></div>
-  <p class="updated" style="margin-bottom: 0.5rem; font-size: 0.85rem;">ℹ️ Un « — » est souvent normal : capteur unique (temp 2, ventilateur 2), données non envoyées par le firmware (hashrate par puce, bloc réseau, etc.) ou optionnelles (pool fallback, raison du reset).</p>
+  <p class="updated" style="margin-bottom: 0.5rem; font-size: 0.85rem;">ℹ️ Les champs affichés « — » ou « N/A » ne sont pas fournis par votre appareil (capteur unique ou option non disponible).</p>
 
   <div class="grid">
     <!-- Hashrate & efficacité -->
@@ -264,6 +264,9 @@
       if (n == null || isNaN(n)) return '—';
       return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: decimals ?? 2 });
     }
+    function na(val) {
+      return (val === undefined || val === null || val === '') ? 'N/A' : val;
+    }
     function formatUptime(sec) {
       if (sec == null || isNaN(sec)) return '—';
       const d = Math.floor(sec / 86400);
@@ -315,7 +318,7 @@
       if (Array.isArray(reasons) && reasons.length) {
         reasonEl.innerHTML = 'Raisons : <ul>' + reasons.map(r => `<li>${r.message || ''}: ${r.count ?? 0}</li>`).join('') + '</ul>';
       } else {
-        reasonEl.textContent = rej ? 'Raisons non détaillées' : 'Aucun rejet';
+        reasonEl.textContent = rej ? 'Non détaillées' : 'Aucun rejet';
       }
 
       get('bestDiff', v => v != null ? formatNum(v) + ' (' + (v >= 1e6 ? (v/1e6).toFixed(2) + ' M' : v) + ')' : '—');
@@ -377,16 +380,16 @@
           return `<div class="chip-line">Chip ${i}: <span class="val">${label} TH/s</span> <span class="ok">✓</span></div>`;
         }).join('');
       } else {
-        chipsContainer.innerHTML = '<div class="muted">Aucune donnée par puce (hashrateMonitor non exposé par l’API du firmware). Les logs du miner contiennent ces valeurs ; une mise à jour firmware peut les exposer via l’API.</div>';
+        chipsContainer.innerHTML = '<div class="muted">Répartition par puce non disponible sur ce modèle.</div>';
       }
 
       get('uptimeSeconds', v => formatUptime(v), ['uptimeSeconds', 'uptime_seconds']);
-      get('version', v => v ?? '—', ['version']);
-      get('axeOSVersion', v => v ?? '—', ['axeOSVersion', 'axeOSVersion', 'axeos_version']);
-      get('hostname', v => v ?? '—', ['hostname']);
-      get('ipv4', v => v ?? '—', ['ipv4', 'ipV4', 'ip']);
+      get('version', v => na(v), ['version']);
+      get('axeOSVersion', v => na(v), ['axeOSVersion', 'axeos_version']);
+      get('hostname', v => na(v), ['hostname']);
+      get('ipv4', v => na(v), ['ipv4', 'ipV4', 'ip']);
       get('wifiRSSI', v => v != null ? v + ' dBm' : '—', ['wifiRSSI', 'wifi_rssi']);
-      get('resetReason', v => v ?? '—', ['resetReason', 'reset_reason']);
+      get('resetReason', v => na(v), ['resetReason', 'reset_reason']);
 
       document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('fr-FR');
     }

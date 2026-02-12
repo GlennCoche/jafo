@@ -14,7 +14,8 @@ L’**image Docker** est construite depuis le projet **`dashboard-next/`** (à l
 
 3. **Configurer les variables** (après installation)  
    - **MINER_IP** : IP ou hostname de votre NerdOctaxe (ex. `192.168.1.37`).  
-   - **APP_BITCOIN_NODE_IP** (optionnel) : URL complète du nœud Bitcoin (REST), ex. `http://192.168.1.35:2100` pour le Public REST API d’Umbrel.  
+   - **APP_BITCOIN_NODE_IP** (optionnel) : URL complète du nœud Bitcoin (REST), ex. `http://IP:PORT` d’un nœud qui expose vraiment l’API REST (JSON).  
+     **Sur Umbrel** : le port 2100 est un proxy qui renvoie l’interface web (HTML), pas le JSON. La carte « Bitcoin Node » affichera alors un message d’erreur explicite. Pour qu’elle fonctionne sur Umbrel, utilisez **RPC** : définissez `BITCOIN_RPC_USER`, `BITCOIN_RPC_PASS` et l’URL/hostname du nœud avec le port RPC (8332) si votre nœud l’expose (réseau interne Umbrel ou tunnel).
 
    Pour modifier les variables : accès SSH à Umbrel, puis éditer  
    `~/umbrel/app-data/jafo-nerdoctaxe-dashboard/docker-compose.yml`  

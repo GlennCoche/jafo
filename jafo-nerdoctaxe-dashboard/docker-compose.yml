@@ -11,7 +11,7 @@ services:
       APP_PORT: 3000
 
   server:
-    image: glenncoche/nerdoctaxe-dashboard:2.0.0
+    image: glenncoche/nerdoctaxe-dashboard:2.1.0
     user: "1001:1001"
     init: true
     restart: on-failure
@@ -20,7 +20,8 @@ services:
       # Full node Umbrel (Public REST API, port 2100)
       APP_BITCOIN_NODE_IP: ${APP_BITCOIN_NODE_IP:-}
       BITCOIN_REST_API_URL: ${BITCOIN_REST_API_URL:-}
-      # Optionnel : RPC si pas de REST
+      # Optionnel : RPC (recommandé sur Umbrel, le port 2100 ne renvoie pas de JSON)
+      BITCOIN_RPC_URL: ${BITCOIN_RPC_URL:-}
       APP_BITCOIN_RPC_PORT: ${APP_BITCOIN_RPC_PORT:-8332}
       BITCOIN_RPC_USER: ${BITCOIN_RPC_USER:-}
       BITCOIN_RPC_PASS: ${BITCOIN_RPC_PASS:-}
