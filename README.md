@@ -28,13 +28,13 @@ Ce dépôt est un **Community App Store** Umbrel. Il permet d’installer l’ap
 3. Cliquez sur **Install** / **Installer**.
 4. Une fois l’app installée, ouvrez-la depuis le tableau de bord Umbrel.
 
-### 3. Configurer l’app (miner + full node)
+### 3. Configurer l’app (miner + StratumX)
 
-L’app est le **dashboard Next.js** (v2). Par défaut elle contacte le miner à **192.168.1.37**. Umbrel ne propose en général pas d’interface pour les variables d’environnement ; il faut les éditer après installation :
+L’app est le **dashboard Next.js** (QUAI / StratumX). Par défaut elle contacte le miner à **192.168.1.37**. Umbrel ne propose en général pas d’interface pour les variables d’environnement ; il faut les éditer après installation :
 
 1. Accédez à votre Umbrel en **SSH** (ou terminal intégré).
 2. Éditez `~/umbrel/app-data/jafo-nerdoctaxe-dashboard/docker-compose.yml` (section `environment` du service `server`).
-3. Définissez au minimum **MINER_IP** (IP de votre NerdOctaxe). Optionnel : **APP_BITCOIN_NODE_IP** (ex. `http://192.168.1.35:2100`) pour afficher la full node Umbrel.
+3. Définissez au minimum **MINER_IP** (IP de votre NerdOctaxe). Optionnel : **STRATUMX_PROFILE_PATH** (chemin vers un fichier JSON de profil StratumX dans le conteneur) ou **STRATUMX_PROFILE_URL** pour afficher la carte « StratumX / Profil minage ».
 4. Redémarrez l’app depuis Umbrel ou : `docker compose down && docker compose up -d` dans ce dossier.
 
 Votre miner et votre Umbrel doivent être sur le **même réseau local**.
@@ -76,7 +76,7 @@ Pour publier (ou mettre à jour) l’image :
    Cela build l’image **multi-arch** (arm64 + amd64) et la pousse sous `glenncoche/nerdoctaxe-dashboard:2.0.0` et `:latest`.
 3. Mettre à jour le tag dans `jafo-nerdoctaxe-dashboard/docker-compose.yml` et la version dans `umbrel-app.yml`, puis pousser le dépôt Jafo sur GitHub.
 
-Voir **DEPLOIEMENT-UMBREL.md** à la racine du dépôt pour le guide complet (installation, config MINER_IP / APP_BITCOIN_NODE_IP, dépannage).
+Voir **DEPLOIEMENT-UMBREL.md** à la racine du dépôt pour le guide complet (installation, config MINER_IP / StratumX, dépannage).
 
 ---
 
@@ -90,7 +90,7 @@ Voir **DEPLOIEMENT-UMBREL.md** à la racine du dépôt pour le guide complet (in
 
 ## Dashboard Next.js (v2)
 
-L’app installée depuis ce store est le **dashboard Next.js** (dépôt parent : **`dashboard-next/`**). Il inclut hashrate, températures, contrôle miner (modes 0–100 %), pool, coût électricité, blockchain, full node (REST), calculateur solo. Développement local : `cd dashboard-next && npm run dev` (voir `dashboard-next/README.md`).
+L’app installée depuis ce store est le **dashboard Next.js** (dépôt parent : **`dashboard-next/`**). Il inclut hashrate, températures, contrôle miner (modes 0–100 %), pool StratumX, coût électricité, blocs et difficulté QUAI (Quaiscan), profil StratumX, calculateur QUAI. Développement local : `cd dashboard-next && npm run dev` (voir `dashboard-next/README.md`).
 
 ---
 

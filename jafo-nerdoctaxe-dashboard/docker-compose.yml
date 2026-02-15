@@ -1,6 +1,5 @@
 # NerdOctaxe Dashboard (Next.js) — déploiement Umbrel OS
-# L'image est construite depuis ../../dashboard-next et poussée sur Docker Hub.
-# Umbrel ne build pas les apps du Community Store : il utilise l'image pré-construite.
+# Minage QUAI via StratumX. L'image est construite depuis ../../dashboard-next et poussée sur Docker Hub.
 
 version: "3.7"
 
@@ -11,20 +10,17 @@ services:
       APP_PORT: 3000
 
   server:
-    image: glenncoche/nerdoctaxe-dashboard:2.1.0
+    image: glenncoche/nerdoctaxe-dashboard:2.2.0
     user: "1001:1001"
     init: true
     restart: on-failure
     environment:
       MINER_IP: ${MINER_IP:-192.168.1.37}
-      # Full node Umbrel (Public REST API, port 2100)
-      APP_BITCOIN_NODE_IP: ${APP_BITCOIN_NODE_IP:-}
-      BITCOIN_REST_API_URL: ${BITCOIN_REST_API_URL:-}
-      # Optionnel : RPC (recommandé sur Umbrel, le port 2100 ne renvoie pas de JSON)
-      BITCOIN_RPC_URL: ${BITCOIN_RPC_URL:-}
-      APP_BITCOIN_RPC_PORT: ${APP_BITCOIN_RPC_PORT:-8332}
-      BITCOIN_RPC_USER: ${BITCOIN_RPC_USER:-}
-      BITCOIN_RPC_PASS: ${BITCOIN_RPC_PASS:-}
+      # Profil StratumX : fichier JSON dans le volume data (copier jafo-mining-profile.json dans data/)
+      STRATUMX_PROFILE_PATH: ${STRATUMX_PROFILE_PATH:-/app/data/jafo-mining-profile.json}
+      STRATUMX_PROFILE_URL: ${STRATUMX_PROFILE_URL:-}
+      # Optionnel : APIs QUAI (défauts : Quaiscan + CoinGecko)
+      QUAISCAN_API_BASE: ${QUAISCAN_API_BASE:-https://quaiscan.io}
+      COINGECKO_QUAI_ID: ${COINGECKO_QUAI_ID:-quai-network}
     volumes:
-      # Répertoire de données Umbrel (persistant) ; l'app utilise surtout les variables d'environnement
       - ${APP_DATA_DIR:-./data}:/app/data
