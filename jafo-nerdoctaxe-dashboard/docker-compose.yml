@@ -1,25 +1,19 @@
-# NerdOctaxe Dashboard (Next.js) — déploiement Umbrel OS
+# NerdOctaxe Dashboard (Next.js) — déploiement Umbrel OS ou local
 # Minage QUAI via StratumX. L'image est construite depuis ../../dashboard-next et poussée sur Docker Hub.
-
-version: "3.7"
+# Pour Umbrel : réintégrer app_proxy si votre stack le requiert.
 
 services:
-  app_proxy:
-    environment:
-      APP_HOST: jafo-nerdoctaxe-dashboard_server_1
-      APP_PORT: 3000
-
   server:
-    image: glenncoche/nerdoctaxe-dashboard:2.2.0
+    image: glenncoche/nerdoctaxe-dashboard:2.3.0
     user: "1001:1001"
     init: true
     restart: on-failure
+    ports:
+      - "3000:3000"
     environment:
       MINER_IP: ${MINER_IP:-192.168.1.37}
-      # Profil StratumX : fichier JSON dans le volume data (copier jafo-mining-profile.json dans data/)
       STRATUMX_PROFILE_PATH: ${STRATUMX_PROFILE_PATH:-/app/data/jafo-mining-profile.json}
       STRATUMX_PROFILE_URL: ${STRATUMX_PROFILE_URL:-}
-      # Optionnel : APIs QUAI (défauts : Quaiscan + CoinGecko)
       QUAISCAN_API_BASE: ${QUAISCAN_API_BASE:-https://quaiscan.io}
       COINGECKO_QUAI_ID: ${COINGECKO_QUAI_ID:-quai-network}
     volumes:

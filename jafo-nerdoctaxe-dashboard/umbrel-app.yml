@@ -4,12 +4,13 @@ name: NerdOctaxe Dashboard
 tagline: Tableau de bord miner NerdOctaxe pour QUAI (StratumX) et monitoring local
 icon: https://raw.githubusercontent.com/getumbrel/umbrel-community-app-store/master/sparkles-hello-world/icon.svg
 category: bitcoin
-version: "2.2.0"
+version: "2.3.0"
 port: 3000
 description: >-
   Tableau de bord pour votre mineur NerdOctaxe : hashrate, températures, consommation,
-  parts, pool StratumX, et données réseau QUAI. Minage QUAI via StratumX (solo). Configurez
-  MINER_IP (IP du NerdOctaxe) et optionnellement STRATUMX_PROFILE_PATH ou STRATUMX_PROFILE_URL.
+  pool StratumX, données réseau QUAI, carte marché QUAI (CoinGecko), calculateur de minage,
+  profil StratumX. Configurez MINER_IP (IP du NerdOctaxe) et optionnellement le profil
+  (fichier jafo-mining-profile.json dans data/ ou STRATUMX_PROFILE_URL).
 developer: GlennCoche
 website: https://github.com/GlennCoche/jafo
 submitter: GlennCoche
@@ -17,8 +18,9 @@ repo: https://github.com/GlennCoche/jafo
 support: https://github.com/GlennCoche/jafo/issues
 gallery: []
 releaseNotes: >-
-  v2.2.0 : QUAI / StratumX — blockchain QUAI (Quaiscan), calculateur QUAI, carte profil StratumX,
-  processus de minage PoEM, plus de Bitcoin. Image Docker 2.2.0.
+  2.3.0 : Carte QUAI/Marché (CoinGecko), calculateur QUAI amélioré, profil StratumX (fichier
+  dans data/), blockchain et blocs QUAI, APIs résilientes. Mettez jafo-mining-profile.json
+  dans le volume data pour le profil.
 dependencies: []
 path: ""
 defaultUsername: ""
