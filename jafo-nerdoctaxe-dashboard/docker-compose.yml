@@ -1,8 +1,13 @@
-# NerdOctaxe Dashboard (Next.js) — déploiement Umbrel OS ou local
-# Minage QUAI via StratumX. L'image est construite depuis ../../dashboard-next et poussée sur Docker Hub.
-# Pour Umbrel : réintégrer app_proxy si votre stack le requiert.
+# NerdOctaxe Dashboard (Next.js) — Umbrel OS (store Jafo)
+# Image multi-arch obligatoire : utiliser build-and-push.sh depuis dashboard-next/.
+# app_proxy : requis par Umbrel pour le routage (APP_HOST = nom du service server).
 
 services:
+  app_proxy:
+    environment:
+      APP_HOST: jafo-nerdoctaxe-dashboard_server_1
+      APP_PORT: 3000
+
   server:
     image: glenncoche/nerdoctaxe-dashboard:2.3.0
     user: "1001:1001"
