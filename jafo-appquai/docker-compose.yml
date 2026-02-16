@@ -1,16 +1,12 @@
 # AppQUAI — Node QUAI (go-quai) + Stratum + Dashboard
-# Umbrel: app_proxy, init, go-quai, server (dashboard)
+# Umbrel : app_proxy sans image (injecté par Umbrel), pas de section networks (géré par Umbrel).
+# Images multi-arch (arm64 + amd64) requises : ./build-and-push.sh 1.0.0
 
 services:
-  # Umbrel replaces this service with its proxy at runtime; image + command for local docker compose
   app_proxy:
-    image: alpine:latest
-    command: ["tail", "-f", "/dev/null"]
     environment:
       APP_HOST: jafo-appquai_server_1
       APP_PORT: "3000"
-    networks:
-      - umbrel_main_network
 
   init:
     image: glenncoche/appquai-init:1.0.0
@@ -18,8 +14,6 @@ services:
       APP_DATA_DIR: /appdata
     volumes:
       - ${APP_DATA_DIR:-./data}:/appdata
-    networks:
-      - umbrel_main_network
 
   go-quai:
     image: glenncoche/appquai-go-quai:1.0.0
@@ -44,8 +38,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    networks:
-      - umbrel_main_network
 
   server:
     image: glenncoche/appquai-server:1.0.0
@@ -61,9 +53,3 @@ services:
       CONFIG_DIR: /app/data/config
     volumes:
       - ${APP_DATA_DIR:-./data}:/app/data
-    networks:
-      - umbrel_main_network
-
-networks:
-  umbrel_main_network:
-    external: true
