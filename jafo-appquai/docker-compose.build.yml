@@ -1,0 +1,10 @@
+# AppQUAI — build des images (pour mainteneur : build-and-push.sh)
+# Utiliser docker-compose.yml (images) pour le store Umbrel.
+
+services:
+  init:
+    build: ./init
+  go-quai:
+    build: ./go-quai
+  server:
+    build: ./app

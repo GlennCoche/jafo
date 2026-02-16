@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 *.log
 jafo-nerdoctaxe-dashboard/data/
+jafo-appquai/data/
+jafo-appquai/app/.next/
+jafo-appquai/app/node_modules/

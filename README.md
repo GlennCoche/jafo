@@ -4,7 +4,7 @@ Ce dépôt est un **Community App Store** Umbrel. Il permet d’installer l’ap
 
 - **Dépôt :** [https://github.com/GlennCoche/jafo](https://github.com/GlennCoche/jafo)
 - **Store ID :** `jafo`
-- **App fournie :** NerdOctaxe Dashboard (`jafo-nerdoctaxe-dashboard`)
+- **Apps fournies :** NerdOctaxe Dashboard (`jafo-nerdoctaxe-dashboard`), **AppQUAI** (`jafo-appquai` — nœud QUAI + Stratum + dashboard)
 
 ---
 
@@ -76,7 +76,9 @@ Pour publier (ou mettre à jour) l’image :
    Cela build l’image **multi-arch** (arm64 + amd64) et la pousse sous `glenncoche/nerdoctaxe-dashboard:2.0.0` et `:latest`.
 3. Mettre à jour le tag dans `jafo-nerdoctaxe-dashboard/docker-compose.yml` et la version dans `umbrel-app.yml`, puis pousser le dépôt Jafo sur GitHub.
 
-Voir **DEPLOIEMENT-UMBREL.md** à la racine du dépôt pour le guide complet (installation, config MINER_IP / StratumX, dépannage).
+**AppQUAI** : les images sont déjà publiées (`glenncoche/appquai-*:1.0.0`). Pour une nouvelle version : `cd jafo-appquai && ./build-and-push.sh <tag>` puis mettre à jour docker-compose.yml et umbrel-app.yml.
+
+Voir **DEPLOIEMENT-UMBREL.md** à la racine du dépôt pour le guide complet (NerdOctaxe : installation, config MINER_IP / StratumX, dépannage).
 
 ---
 
