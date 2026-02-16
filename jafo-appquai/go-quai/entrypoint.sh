@@ -1,6 +1,22 @@
 #!/bin/sh
 set -e
 
+# Create data/config dirs and default settings.json if missing (replaces init container for Umbrel)
+DATA_DIR="${DATA_DIR:-/data}"
+CONFIG_DIR="${CONFIG_DIR:-/config}"
+SETTINGS_FILE="${CONFIG_DIR}/settings.json"
+mkdir -p "$DATA_DIR" "$CONFIG_DIR"
+if [ ! -f "$SETTINGS_FILE" ]; then
+  cat > "$SETTINGS_FILE" << 'DEFAULT'
+{
+  "quaiCoinbases": "0x00433b2AdDF610eA8280B9A929F1db8fbF0E3678",
+  "qiCoinbases": "0x00433b2AdDF610eA8280B9A929F1db8fbF0E3678",
+  "minerPreference": 0.5,
+  "coinbaseLockup": 0
+}
+DEFAULT
+fi
+
 # Defaults (mainnet Colosseum, slice [0 0], Stratum enabled)
 QUAI_COINBASES="${QUAI_COINBASES:-0x00433b2AdDF610eA8280B9A929F1db8fbF0E3678}"
 QI_COINBASES="${QI_COINBASES:-0x00433b2AdDF610eA8280B9A929F1db8fbF0E3678}"
