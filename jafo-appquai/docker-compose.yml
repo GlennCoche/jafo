@@ -1,6 +1,6 @@
 # AppQUAI — Node QUAI (go-quai) + Stratum + Dashboard
 # Aligné sur willitmod-dev-bch : version 3.7, init, app_proxy (JWT_SECRET + umbrel_main_network), alias pour le dashboard.
-# Images multi-arch (arm64 + amd64) : ./build-and-push.sh 1.0.2
+# Images multi-arch (arm64 + amd64) : ./build-and-push.sh 1.0.3
 
 version: "3.7"
 
@@ -14,7 +14,7 @@ services:
       - umbrel_main_network
 
   init:
-    image: glenncoche/appquai-init:1.0.2
+    image: glenncoche/appquai-init:1.0.3
     restart: "no"
     volumes:
       - ${APP_DATA_DIR}:/appdata
@@ -23,7 +23,7 @@ services:
       JWT_SECRET: "${JWT_SECRET}"
 
   go-quai:
-    image: glenncoche/appquai-go-quai:1.0.2
+    image: glenncoche/appquai-go-quai:1.0.3
     user: "1000:1000"
     init: true
     restart: unless-stopped
@@ -41,7 +41,7 @@ services:
       - "3333:3333"
 
   server:
-    image: glenncoche/appquai-server:1.0.2
+    image: glenncoche/appquai-server:1.0.3
     init: true
     restart: on-failure
     stop_grace_period: 30s
