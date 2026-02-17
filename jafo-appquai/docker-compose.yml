@@ -1,39 +1,70 @@
 # AppQUAI — Node QUAI (go-quai) + Stratum + Dashboard
-# Umbrel : app_proxy sans image (injecté par Umbrel), pas de section networks (géré par Umbrel).
-# Init intégré dans l'entrypoint go-quai (pas de conteneur init qui s'arrête = meilleure compatibilité Umbrel).
-# Images multi-arch (arm64 + amd64) : ./build-and-push.sh 1.0.0
+# Aligné sur willitmod-dev-bch : version 3.7, init, app_proxy (JWT_SECRET + umbrel_main_network), alias pour le dashboard.
+# Images multi-arch (arm64 + amd64) : ./build-and-push.sh 1.0.2
+
+version: "3.7"
 
 services:
   app_proxy:
     environment:
-      APP_HOST: jafo-appquai_server_1
+      APP_HOST: jafo-appquai-app
       APP_PORT: "3000"
+      JWT_SECRET: "${JWT_SECRET}"
+    networks:
+      - umbrel_main_network
+
+  init:
+    image: glenncoche/appquai-init:1.0.2
+    restart: "no"
+    volumes:
+      - ${APP_DATA_DIR}:/appdata
+    environment:
+      APP_DATA_DIR: "/appdata"
+      JWT_SECRET: "${JWT_SECRET}"
 
   go-quai:
-    image: glenncoche/appquai-go-quai:1.0.1
-    user: "0:0"
+    image: glenncoche/appquai-go-quai:1.0.2
+    user: "1000:1000"
     init: true
     restart: unless-stopped
     stop_grace_period: 60s
+    depends_on:
+      init:
+        condition: service_completed_successfully
     environment:
       DATA_DIR: /data
       CONFIG_DIR: /config
     volumes:
-      - ${APP_DATA_DIR:-./data}/quai-data:/data
-      - ${APP_DATA_DIR:-./data}/config:/config:ro
+      - ${APP_DATA_DIR}/quai-data:/data
+      - ${APP_DATA_DIR}/config:/config:ro
     ports:
       - "3333:3333"
 
   server:
-    image: glenncoche/appquai-server:1.0.1
+    image: glenncoche/appquai-server:1.0.2
     init: true
     restart: on-failure
     stop_grace_period: 30s
     depends_on:
-      - go-quai
+      init:
+        condition: service_completed_successfully
+      go-quai:
+        condition: service_started
     environment:
       GO_QUAI_API_URL: http://go-quai:3336
       MINER_IP: ${MINER_IP:-}
       CONFIG_DIR: /app/data/config
     volumes:
-      - ${APP_DATA_DIR:-./data}:/app/data
+      - ${APP_DATA_DIR}:/app/data
+    networks:
+      default:
+        aliases:
+          - jafo-appquai-app
+      umbrel_main_network:
+        aliases:
+          - jafo-appquai-app
+
+networks:
+  umbrel_main_network:
+    external: true
+    name: umbrel_main_network
