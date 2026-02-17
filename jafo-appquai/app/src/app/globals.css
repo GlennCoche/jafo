@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0d1117;
-  --foreground: #e6edf3;
+  --background: #0c0f14;
+  --foreground: #f1f5f9;
   --card: #161b22;
-  --border: #30363d;
-  --muted: #8b949e;
+  --border: rgba(255, 255, 255, 0.1);
+  --muted: #94a3b8;
   --accent: #58a6ff;
-  --ok: #3fb950;
-  --warn: #d29922;
+  --ok: #22c55e;
+  --warn: #eab308;
   --err: #f85149;
+  --axe-950: #0c0f14;
+  --axe-ring: linear-gradient(90deg, #00e5ff, #ff2bd6, #ff9a00);
 }
 
 @theme inline {
@@ -21,4 +23,95 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* AxeBTC-like components */
+.axe-card {
+  @apply rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5;
+}
+
+.axe-stat {
+  @apply rounded-xl border border-white/10 bg-black/20 p-3;
+}
+
+.axe-stat__k {
+  @apply text-xs font-semibold uppercase tracking-wider text-slate-400;
+}
+
+.axe-stat__v {
+  @apply mt-1 text-xl font-extrabold tracking-tight text-white;
+}
+
+.axe-tabs {
+  @apply flex gap-1;
+}
+
+.axe-tab {
+  @apply rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-slate-200;
+}
+
+.axe-tab--active {
+  @apply bg-white/10 text-white underline decoration-2 decoration-amber-400 underline-offset-4;
+}
+
+.axe-pill {
+  @apply inline-flex items-center rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-wider text-slate-300;
+}
+
+.axe-pill--syncing {
+  @apply border-amber-400/30 bg-amber-400/10 text-amber-300;
+}
+
+.axe-pill--ok {
+  @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-300;
+}
+
+.axe-pill--err {
+  @apply border-red-500/30 bg-red-500/10 text-red-300;
+}
+
+.axe-btn {
+  @apply inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15;
+}
+
+.axe-btn--ghost {
+  @apply border-transparent bg-transparent hover:bg-white/10;
+}
+
+.axe-field {
+  @apply flex flex-col gap-1;
+}
+
+.axe-label {
+  @apply text-sm font-medium text-slate-300;
+}
+
+.axe-input {
+  @apply rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30;
+}
+
+.axe-help {
+  @apply mt-1 text-xs text-slate-500;
+}
+
+.axe-note {
+  @apply rounded-xl border border-white/10 bg-black/25 px-3 py-2;
+}
+
+.axe-note__k {
+  @apply text-[10px] font-extrabold uppercase tracking-wider text-slate-400;
+}
+
+.axe-note__v {
+  @apply mt-1 font-mono text-sm text-white;
+}
+
+/* Sync ring (gradient circle) */
+.axe-ring circle.ring-bg {
+  stroke: #1f2937;
+}
+
+.axe-ring circle.ring-progress {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
 }
